@@ -1,8 +1,7 @@
-import { it, test, expect, describe, jest, beforeAll } from "@jest/globals"
+import { it, expect, describe, beforeAll } from "@jest/globals"
 import { AppDataSource } from "../data-source"
 import request from "supertest"
 import app from "../app"
-
 
 describe("User routes", () => {
   beforeAll( async () => {
@@ -16,39 +15,34 @@ describe("User routes", () => {
   }
 
   it("should return a bad request when getting users with empty database", async () => {
-    const response = await request(app).get("/users")
+    const response = await request(app).get("/users").send(userData)
   
     expect(response.status).toBe(400)
-    expect(response.body).not.toHaveProperty("message")
+    expect(response.body).toHaveProperty("message")
   })
 
-  test("creating a user", async () => {
-    const response = await request(app).post("/user").send(userData)
+  it("creating a user", async () => {
+    const response = await request(app).post("/users").send(userData)
   
-    expect(response.status).toBe(100)
+    expect(response.status).toBe(201)
   })
-  
+
   it("should return a bad request when creating a already existet user.", async () => {
-    const response = await request(app).post("/user").send(userData)
+    const response = await request(app).post("/users").send(userData)
   
     expect(response.status).toBe(400)
     expect(response.body).toHaveProperty("message")
   })
 
   it("should return a bad request when creating a user with age < 18.", async () => {
-    const requestWithSeventeenAge = await request(app).post("/users").send({
-      name:"test",
-      email: "test002@email.com",
-      age: 20
-    })
+    const response = await request(app).post("/users").send(userData)
     
-
-    expect(requestWithSeventeenAge.status).toBe(400)
-    expect(requestWithSeventeenAge.body).toHaveProperty("message")
+    expect(response.status).toBe(400)
+    expect(response.body).toHaveProperty("message")
   })
 
   it("should return a list with all users", async () => {
-    const response = await request(app).get("/")
+    const response = await request(app).get("/users").send(userData)
   
     expect(response.status).toBe(200)
     expect(response.body).toHaveProperty("forEach")
